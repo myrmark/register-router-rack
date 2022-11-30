@@ -155,7 +155,7 @@ while True:
     if serialcheck:
         print('Serial already exists in database')
         answer = input('Reprint label? (y/N): ')
-        if answer.lower in ['y','yes']:
+        if answer.lower() in ['y','yes']:
             unitname = sqlquery(f"SELECT custarticlename FROM simdb.custspecificracks WHERE articlenumber='{sap}'")
             sapdb = sqlquery(f"SELECT custarticlenumber FROM simdb.custspecificracks WHERE articlenumber='{sap}'")
             rackserial = sqlquery(f"SELECT rackserial FROM simdb.racks WHERE routerserial LIKE {serial}")
