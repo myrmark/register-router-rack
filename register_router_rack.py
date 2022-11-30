@@ -159,7 +159,7 @@ while True:
             unitname = sqlquery(f"SELECT custarticlename FROM simdb.custspecificracks WHERE articlenumber='{sap}'")
             sapdb = sqlquery(f"SELECT custarticlenumber FROM simdb.custspecificracks WHERE articlenumber='{sap}'")
             rackserial = sqlquery(f"SELECT rackserial FROM simdb.racks WHERE routerserial LIKE {serial}")
-            customerserialprefix = sqlquery(f"SELECT serialprefix FROM simdb.racks WHERE routerserial LIKE {serial}")
+            customerserialprefix = sqlquery(f"SELECT customerserialprefix FROM simdb.racks WHERE routerserial LIKE {serial}")
             customerserial = str(sqlquery(f"SELECT customerserial FROM simdb.racks WHERE routerserial LIKE {serial}"))
             concatenateserial = customerserialprefix+customerserial
             rackid = sqlquery(f"SELECT rackid FROM simdb.racks WHERE rackserial LIKE '{rackserial}'")
