@@ -134,7 +134,7 @@ def print_label(serial,sap,sapdb,unitname,concatenateserial,rackserial,user,logi
         f"-o  /home/{user}/labelfiles/{serial}l.pdf".split("  ")
     subprocess.run(cmd)
     sleep(1)
-    cmd = f"lp -n 2 -c /home/{user}/labelfiles/{serial}.pdf -c /home/{user}/labelfiles/{serial}l.pdf -d {printer} -o media={labelsize}".split()
+    cmd = f"lp -n 1 -c /home/{user}/labelfiles/{serial}.pdf -c /home/{user}/labelfiles/{serial}.pdf -c /home/{user}/labelfiles/{serial}l.pdf -d {printer} -o media={labelsize}".split()
     subprocess.run(cmd)
 
 
