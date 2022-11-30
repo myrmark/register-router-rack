@@ -116,7 +116,7 @@ def dbupload(cmd1, cmd2):
     db.close()
     
     
-def print_label(serial,sap,sapdb,unitname,concatenateserial,rackserial,user,logisticsQR,printer,labelsize):
+def print_label(serial,sap,sapdb,unitname,concatenateserial,rackserial,user,printer,labelsize):
     cmd = "glabels-batch-qt  "\
         f"/mnt/fs/Icomera/Line/Supply Chain/Production/Glabels/Templates/router_rack.glabels  "\
         f"-D  serial={serial}  "\
@@ -164,7 +164,7 @@ while True:
             concatenateserial = customerserialprefix+customerserial
             rackid = sqlquery(f"SELECT rackid FROM simdb.racks WHERE rackserial LIKE '{rackserial}'")
             logisticsQR = str(serial)+" - "+str(rackserial)
-            print_label(serial,sap,sapdb,unitname,concatenateserial,rackserial,user,logisticsQR,printer,labelsize)
+            print_label(serial,sap,sapdb,unitname,concatenateserial,rackserial,user,printer,labelsize)
     else:
         racks = sqlquery("SELECT MAX(rackserial)+1 FROM simdb.racks")
         racks=int(racks)
@@ -200,24 +200,6 @@ while True:
                     concatenateserial = customerserialprefix+customerserial
                 else:
                     concatenateserial = customerserial
-                cmd = "glabels-batch-qt  "\
-                    f"/mnt/fs/Icomera/Line/Supply Chain/Production/Glabels/Templates/router_rack.glabels  "\
-                    f"-D  serial={serial}  "\
-                    f"-D  sap={sap}  "\
-                    f"-D  sapdb={sapdb}  "\
-                    f"-D  name={unitname}  "\
-                    f"-D  custs={concatenateserial}  "\
-                    f"-D  rackserial={rackserial}  "\
-                    f"-o  /home/{user}/labelfiles/{serial}.pdf".split("  ")
-                subprocess.run(cmd)
-                logisticsQR = str(serial)+" - "+str(rackserial)
-                cmd = "glabels-batch-qt  "\
-                    f"/mnt/fs/Icomera/Line/Supply Chain/Production/Glabels/Templates/logisticslabel.glabels  "\
-                    f"-D  serial={logisticsQR}  "\
-                    f"-o  /home/{user}/labelfiles/{serial}l.pdf".split("  ")
-                subprocess.run(cmd)
-                sleep(1)
-                cmd = f"lp -n 2 -c /home/{user}/labelfiles/{serial}.pdf -c /home/{user}/labelfiles/{serial}l.pdf -d {printer} -o media={labelsize}".split()
-                subprocess.run(cmd)
+            print_label(serial,sap,sapdb,unitname,concatenateserial,rackserial,user,printer,labelsize)
         else:
             print('Upload failed!')
