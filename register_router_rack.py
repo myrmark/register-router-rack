@@ -114,6 +114,28 @@ def dbupload(cmd1, cmd2):
     db.commit()
     cursor.close()
     db.close()
+    
+    
+def print_label(serial,sap,sapdb,unitname,concatenateserial,rackserial,user,logisticsQR,printer,labelsize):
+    cmd = "glabels-batch-qt  "\
+        f"/mnt/fs/Icomera/Line/Supply Chain/Production/Glabels/Templates/router_rack.glabels  "\
+        f"-D  serial={serial}  "\
+        f"-D  sap={sap}  "\
+        f"-D  sapdb={sapdb}  "\
+        f"-D  name={unitname}  "\
+        f"-D  custs={concatenateserial}  "\
+        f"-D  rackserial={rackserial}  "\
+        f"-o  /home/{user}/labelfiles/{serial}.pdf".split("  ")
+    subprocess.run(cmd)
+    logisticsQR = str(serial)+" - "+str(rackserial)
+    cmd = "glabels-batch-qt  "\
+        f"/mnt/fs/Icomera/Line/Supply Chain/Production/Glabels/Templates/logisticslabel.glabels  "\
+        f"-D  serial={logisticsQR}  "\
+        f"-o  /home/{user}/labelfiles/{serial}l.pdf".split("  ")
+    subprocess.run(cmd)
+    sleep(1)
+    cmd = f"lp -n 2 -c /home/{user}/labelfiles/{serial}.pdf -c /home/{user}/labelfiles/{serial}l.pdf -d {printer} -o media={labelsize}".split()
+    subprocess.run(cmd)
 
 
 while True:
@@ -128,13 +150,22 @@ while True:
     serialcheck = sqlquery(f"SELECT rackid FROM simdb.racks WHERE routerserial='{serial}'")
     #serialcheck = sqlquery('rackid','racks','routerserial',serial)
     #try:
+    customerid = sqlquery(f"SELECT customerid FROM simdb.custspecificracks WHERE articlenumber='{sap}'")
+    projectid = sqlquery(f"SELECT projectid FROM simdb.custspecificracks WHERE articlenumber='{sap}'")
     if serialcheck:
         print('Serial already exists in database')
+        answer = input('Reprint label? (y/N): ')
+        if answer.lower in ['y','yes']:
+            unitname = sqlquery(f"SELECT custarticlename FROM simdb.custspecificracks WHERE articlenumber='{sap}'")
+            sapdb = sqlquery(f"SELECT custarticlenumber FROM simdb.custspecificracks WHERE articlenumber='{sap}'")
+            rackserial = sqlquery(f"SELECT rackserial FROM simdb.racks WHERE routerserial LIKE {serial}")
+            customerserialprefix = sqlquery(f"SELECT serialprefix FROM simdb.racks WHERE routerserial LIKE {serial}")
+            customerserial = str(sqlquery(f"SELECT customerserial FROM simdb.racks WHERE routerserial LIKE {serial}"))
+            concatenateserial = customerserialprefix+customerserial
+            rackid = sqlquery(f"SELECT rackid FROM simdb.racks WHERE rackserial LIKE '{rackserial}'")
+            logisticsQR = str(serial)+" - "+str(rackserial)
+            print_label(serial,sap,sapdb,unitname,concatenateserial,rackserial,user,logisticsQR,printer,labelsize)
     else:
-        customerid = sqlquery(f"SELECT customerid FROM simdb.custspecificracks WHERE articlenumber='{sap}'")
-        projectid = sqlquery(f"SELECT projectid FROM simdb.custspecificracks WHERE articlenumber='{sap}'")
-        #customerid = sqlquery('customerid','custspecificracks','articlenumber',sap)
-        #projectid = sqlquery('projectid','custspecificracks','articlenumber',sap)
         racks = sqlquery("SELECT MAX(rackserial)+1 FROM simdb.racks")
         racks=int(racks)
         rackserial=str(racks).zfill(6)
