@@ -137,21 +137,22 @@ def print_label(serial,sap,sapdb,unitname,concatenateserial,rackserial,user,prin
     cmd = f"lp -n 1 -c /home/{user}/labelfiles/{serial}.pdf -c /home/{user}/labelfiles/{serial}.pdf -c /home/{user}/labelfiles/{serial}l.pdf -d {printer} -o media={labelsize}".split()
     subprocess.run(cmd)
 
+    
+title = 'Select printer: '
+options = ['TTP-644MT', 'ME340_production', 'Zebra_ZT230_production', 'ME340_lager', 'Zebra_ZT230_lager']
+printer, index = pick(options, title)
+title = 'Choose label size: '
+options = ['60x30mm', '100x20mm', '101x152mm']
+labelsize, index = pick(options, title)
+sap = input('Enter your SAP number: ')
+customerid = sqlquery(f"SELECT customerid FROM simdb.custspecificracks WHERE articlenumber='{sap}'")
+projectid = sqlquery(f"SELECT projectid FROM simdb.custspecificracks WHERE articlenumber='{sap}'")
+    
 
 while True:
-    title = 'Select printer: '
-    options = ['TTP-644MT', 'ME340_production', 'Zebra_ZT230_production', 'ME340_lager', 'Zebra_ZT230_lager']
-    printer, index = pick(options, title)
-    title = 'Choose label size: '
-    options = ['60x30mm', '100x20mm', '101x152mm']
-    labelsize, index = pick(options, title)
-    sap = input('Enter your SAP number: ')
     serial = input('Enter router serial: ')
     serialcheck = sqlquery(f"SELECT rackid FROM simdb.racks WHERE routerserial='{serial}'")
-    #serialcheck = sqlquery('rackid','racks','routerserial',serial)
-    #try:
-    customerid = sqlquery(f"SELECT customerid FROM simdb.custspecificracks WHERE articlenumber='{sap}'")
-    projectid = sqlquery(f"SELECT projectid FROM simdb.custspecificracks WHERE articlenumber='{sap}'")
+    
     if serialcheck:
         print('Serial already exists in database')
         answer = input('Reprint label? (y/N): ')
@@ -180,7 +181,6 @@ while True:
             sapdb = sqlquery(f"SELECT custarticlenumber FROM simdb.custspecificracks WHERE articlenumber='{sap}'")
             print(sapdb)
             customerserialprefix = sqlquery(f"SELECT serialprefix FROM simdb.custspecificracks WHERE articlenumber='{sap}'")
-            #customerserialprefix = customerserialprefix.split('.')[0]
             customerserial = str(sqlquery(f"SELECT MAX(customerserial)+1 FROM simdb.racks WHERE customerserial IS NOT NULL AND customerserialprefix LIKE '{customerserialprefix}'")).split('.')[0]
             customerserial = customerserial.zfill(4)
             print(customerserialprefix,customerserial)
